@@ -1,0 +1,23 @@
+[tool.poetry]
+name = "pharmacy-shop"
+version = "0.1.0"
+description = ""
+authors = ["blackprince001 <appiahboaduprince@gmail.com>"]
+readme = "README.md"
+packages = [{include = "pharmacy_shop"}]
+
+[tool.poetry.dependencies]
+python = "^3.11"
+fastapi = "^0.103.0"
+uvicorn = "^0.23.2"
+pydantic = "^2.3.0"
+sqlalchemy = "^2.0.20"
+email-validator = "^2.0.0.post2"
+passlib = {extras = ["bcrypt"], version = "^1.7.4"}
+python-multipart = "^0.0.6"
+python-jose = {extras = ["cryptography"], version = "^3.3.0"}
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
