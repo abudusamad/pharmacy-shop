@@ -55,4 +55,8 @@ def update_student(student_id:int, student:StudentUpdate):
         return {"Error" : "Student does not exist"}
     if student.name != None:
         students[student_id].name = student.name
-        return students[student_id]
+    elif student.age != None:
+        students[student_id].age = student.age
+    elif student.year != None:
+        students[student_id].year = student.year
+     return students[student_id]
