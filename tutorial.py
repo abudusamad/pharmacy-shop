@@ -18,10 +18,16 @@ students ={
     }
 }
 
-class student(BaseModel):
-    name:str
+class Student(BaseModel):
+    name: str
     age: int
     year: str
+
+
+class StudentUpdate(BaseModel):
+    name: Optional[str] = None
+    age: Optional[int] = None
+    Year: Optional[str] = None
     
     
 @app.get("/get_student/{student_id}")
@@ -36,8 +42,16 @@ def get_student_name(*, student_id:int, name:Optional [str], test: int):
     return {"Data" : "Not found"}
 
 @app.post("/create-student/{student_id}")
-def create_student(student_id: int, student:student):
+def create_student(student_id: int, student:Student):
     if student_id in students:
         return{"Error" : " Student already exits"}
-    students[student_id] = student
+    students[student_id] = Student
+    return students[student_id]
+
+
+@app.put("/update-student/{student_id}")
+def update_student(student_id:int, student:StudentUpdate):
+    if student_id not in students:
+        return {"Error" : "Student does not exist"}
+    students[student_id] =student
     return students[student_id]
