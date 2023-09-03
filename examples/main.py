@@ -27,3 +27,6 @@ def read_items(items_id: int, q: Union[str, None] = None):
 @app.put("/items/{items_id}")
 def put_items(items_id: int, items: Item):
     return {"Items_name": items.name, "item_id": items_id}
+
+def get_inform():
+    return{"message": "Hello World"}
