@@ -14,5 +14,5 @@ async def get_model(model_name:ModelName):
         return {"model_name":model_name, "message":"Hellow josnet how are you"}
     if model_name.value == "lexnet":
         return {"model_name":model_name, "message":"printing the name of the lexnet"}
-    return {"model_name": model_name, "message":"model is the same as the order one"}
+    return {"model_name": model_name, "message":"model is the same as the order one "}
 
