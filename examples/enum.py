@@ -1,7 +1,12 @@
+class Enum:
+    pass
+
+
 from enum import Enum
 
 from fastapi import FastAPI
 
+from main import app
 
 class ModelName(str, Enum):
     alexnet = "alexnet"
