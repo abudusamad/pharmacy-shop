@@ -1,8 +1,29 @@
-from fastapi import FastAPI
+from typing import Union
 
-app =FastAPI()
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+app = FastAPI()
+
+
+class Item(BaseModel):
+    name: str
+    price: int
+    is_active: Union[bool, None] = None
+
 
 @app.get("/")
+def read_root():
+    return {"messages": "Hello world"}
 
-def get_inform():
-    return{"message": "Hello World"}
+
+app.get("/items/{items_id}")
+
+
+def read_items(items_id: int, q: Union[str, None] = None):
+    return {"items_id": items_id, "q": q}
+
+
+@app.put("/items/{items_id}")
+def put_items(items_id: int, items: Item):
+    return {"Items_name": items.name, "item_id": items_id}
