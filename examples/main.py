@@ -5,4 +5,4 @@ app =FastAPI()
 @app.get("/")
 
 def get_inform():
-    return{"message": "World"}
+    return{"message": "Hello World"}
