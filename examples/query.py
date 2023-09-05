@@ -50,11 +50,20 @@ async def read_user_item(
 # REQUEST BODY
 class Item(BaseModel):
     name: str
-    price:int
+    price: float
     description: str | None = None
-    tax: int | None = None
+    tax: float | None = None
 
 
 @app.post("/item/")
 async def create_item(item: Item):
     return item
+
+# REQUEST BODY + PYDANTIC MODEL
+
+@app.put("/items/{item_id}")
+async def create_item(item_id:int, item: Item, q: str | None = None):
+    result ={"item_id": item_id, **item.dict()}
+    if q:
+        result.update({"q":q})
+    return result
