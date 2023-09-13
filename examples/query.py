@@ -62,7 +62,7 @@ async def create_item(item:Item):
         item_dict.update({"price_with_tax" : price_with_tax})
     return item_dict
 
-# REQUEST BODY + PYDANTIC MODEL
+# RESQUEST BODY + PATH PARAMETER
 
 @app.put("/items/{item_id}")
 async def create_item(item_id:int, item: Item, q: str | None = None):
@@ -70,3 +70,6 @@ async def create_item(item_id:int, item: Item, q: str | None = None):
     if q:
         result.update({"q":q})
     return result
+
+
+#QUERY PARAMETER AND STRING VALIDATION
