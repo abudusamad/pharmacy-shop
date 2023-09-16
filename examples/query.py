@@ -73,3 +73,6 @@ async def create_item(item_id:int, item: Item, q: str | None = None):
 
 
 #QUERY PARAMETER AND STRING VALIDATION
+@app.get("/item")
+async def get_item(q:str | None=None ):
+    
