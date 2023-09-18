@@ -1,4 +1,6 @@
 from pydantic import BaseModel
+from typing import Annotated
+from fastapi import Query
 
 from main import app
 
@@ -74,5 +76,22 @@ async def create_item(item_id:int, item: Item, q: str | None = None):
 
 #QUERY PARAMETER AND STRING VALIDATION
 @app.get("/item")
-async def get_item(q:str | None=None ):
-    
+async def read_items(
+    q: Annotated[
+        str | None,
+        Query(
+            alias="item-query",
+            title="Query string",
+            description="Query string for the items to search in the database that have a good match",
+            min_length=3,
+            max_length=50,
+            pattern="^fixedquery$",
+            deprecated=True,
+        ),
+    ] = None
+):
+    results ={[{"item_id":"Foo"}, {"item_id":"Koo"}]}
+    if q:
+        results.update({q:"q"})
+    return results
+
