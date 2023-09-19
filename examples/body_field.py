@@ -11,7 +11,8 @@ class Item(BaseModel):
     price:float = Field(gt=0, description="The price should be greater than zero")
     tax: float | None = None
     
-    @app.put("/items/{item_id}")
-    async def update_item(item_id:int, item:Annotated[Item, Body(embed=True)]):
-        results = {"item_id": item_id, "item":item}
-        return results
+
+@app.put("/items/{item_id}")
+async def update_item(item_id:int, item:Annotated[Item, Body(embed=True)]):
+    results = {"item_id": item_id, "item":item}
+    return results
