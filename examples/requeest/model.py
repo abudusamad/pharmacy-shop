@@ -11,19 +11,33 @@ class Item(BaseModel):
     price: float
     tax: Union[float, None] = None
     tags: List[str] = []
+
     
-class UserIn(BaseModel):
+class UserOut(BaseModel):
     username: str
-    password: str
     email: EmailStr
     full_name: Union[str, None] = None
+    
+
+class BaseUser(BaseModel):
+    username: str
+    email: EmailStr
+    full_name: Union[str, None] = None
+ 
+class UserIn(BaseUser):
+    password: str
+    
     
 @app.post("/items/", response_model=Item)
 async def create_items(item: Item) -> Any :
     return item
 
-@app.post("/Users/")
-async def create_user(user: UserIn) -> UserIn:
+@app.post("/Users/", response_model=UserOut)
+async def create_user(user: UserIn) -> Any:
+    return user
+
+@app.post("/user/")
+async def create_user(user: UserIn) -> BaseUser:
     return user
 
 @app.get("/items/", response_model=List[Item])
