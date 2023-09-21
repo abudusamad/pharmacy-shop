@@ -12,18 +12,18 @@ class CommonQueryParams:
         self.limit = limit
         
 
-async def common_parameters(q: str | None = None, skip: int = 0, limit: int = 100):
-    return {"q": q, "skip": skip, "limit": limit}
+# async def common_parameters(q: str | None = None, skip: int = 0, limit: int = 100):
+#     return {"q": q, "skip": skip, "limit": limit}
 
-CommonsDep = Annotated[dict, Depends(common_parameters)]
+# CommonsDep = Annotated[dict, Depends(common_parameters)]
 
-@app.get("/items/")
-async def read_items(common: CommonsDep):
-    return common
+# @app.get("/items/")
+# async def read_items(common: CommonsDep):
+#     return common
 
-@app.get("/users/")
-async def read_users(commons: CommonsDep):
-    return commons
+# @app.get("/users/")
+# async def read_users(commons: CommonsDep):
+#     return commons
 
 @app.get("/items/")
 async def read_items(commons: Annotated[CommonQueryParams, Depends(CommonQueryParams)]):
@@ -32,4 +32,4 @@ async def read_items(commons: Annotated[CommonQueryParams, Depends(CommonQueryPa
         response.update({"q": commons.q})
         items = fake_items_db[commons.skip : commons.skip + commons.limit]
         response.update({"items": items})
-        return response
+    return response
