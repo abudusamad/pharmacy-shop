@@ -14,7 +14,7 @@ class CommonQueryParamas:
         
 
 @app.get("/items/")
-async def read_items(commons: Annotated[Any, Depends(CommonQueryParamas)]):
+async def read_items(commons: Annotated[CommonQueryParamas, Depends()]):
     response = {}
     if commons.q:
         response.update({"q": commons.q})
