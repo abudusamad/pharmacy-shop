@@ -1,4 +1,4 @@
-from typing import Annotated
+from typing import Annotated, Any
 
 from fastapi import Depends, FastAPI
 
@@ -14,7 +14,7 @@ class CommonQueryParamas:
         
 
 @app.get("/items/")
-async def read_items(commons: Annotated[CommonQueryParamas, Depends(CommonQueryParamas)]):
+async def read_items(commons: Annotated[Any, Depends(CommonQueryParamas)]):
     response = {}
     if commons.q:
         response.update({"q": commons.q})
