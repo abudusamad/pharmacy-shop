@@ -1,6 +1,7 @@
 from typing import List, Union, Any
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Response
+from fastapi.responses import RedirectResponse
 from pydantic import BaseModel, EmailStr
 
 app = FastAPI()
@@ -47,3 +48,24 @@ async def read_items() -> Any:
         Item(name= "Plumbus", price=32.0)
     ]
     
+
+
+@app.get("/portal", response_model=None)
+async def get_portal(teleport: bool = False) -> Union[Response, dict]:
+    if teleport:
+        return RedirectResponse(url="https://www.youtube.com/watch?v=dQw4w9WgXcQ")
+    return {"message": "Here's your interdimensional portal."}
+
+
+
+
+items = {
+    "foo": {"name": "Foo", "price": 50.2},
+    "bar": {"name": "Bar", "description": "The bartenders", "price": 62, "tax": 20.2},
+    "baz": {"name": "Baz", "description": None, "price": 50.2, "tax": 10.5, "tags": []},
+}
+
+
+@app.get("/items/{item_id}", response_model=Item, response_model_exclude_unset=True)
+async def read_item(item_id: str):
+    return items[item_id]
