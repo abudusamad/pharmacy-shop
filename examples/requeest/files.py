@@ -7,12 +7,12 @@ app = FastAPI()
 
 
 @app.post("/files/")
-async def create_files(files: Annotated[list[bytes], File()]):
+async def create_files(files: Annotated[list[bytes], File(description="multilpes files as bytes")]):
     return {"file_sizes": [len(file) for file in files]}
 
 
 @app.post("/uploadfiles/")
-async def create_upload_files(files: list[UploadFile]):
+async def create_upload_files(files: Annotated[list[UploadFile], File(description="Multiple files as UploadFile")]):
     return {"filenames": [file.filename for file in files]}
 
 
