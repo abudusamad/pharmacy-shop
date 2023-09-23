@@ -6,17 +6,17 @@ from pydantic import BaseModel, EmailStr
 
 fake_user_db= {
     "mascot":{
-        "username": "mascotford",
+        "username": "mascot",
         "full_name": "mascot ford",
         "email":"abudusamed@gmail.com",
-        "hashed_password": "fakemascot",
+        "hashed_password": "fakehashedsecret",
         "disabled": False,
     },
        "richard":{
         "username": "rich",
         "full_name": "Richard Oppong",
         "email":"richoppong@gmail.com",
-        "hashed_password": "fakerich",
+        "hashed_password": "fakehashedsecret2",
         "disabled": True,
     },   
     
