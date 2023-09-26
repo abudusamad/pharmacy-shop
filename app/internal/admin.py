@@ -1,61 +1,89 @@
-from typing import Any, List, Union
-from fastapi import FastAPI, Response
-from fastapi.responses import JSONResponse, RedirectResponse
+import sqlalchemy.exc
+from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi.security import OAuth2PasswordRequestForm
+from sqlalchemy import select
 
-from pydantic import BaseModel, EmailStr
+from pharmacy.database.models.admins import Admin
+from pharmacy.dependencies.auth import AuthenticatedAdmin, get_authenticated_admin
+from pharmacy.dependencies.database import AnnotatedAdmin, Database
+from pharmacy.dependencies.jwt import create_token
+from pharmacy.schemas.admins import AdminCreate, AdminSchema
+from pharmacy.schemas.tokens import Token
+from pharmacy.security import get_hash, password_matches_hashed
 
-app = FastAPI()
+router = APIRouter(prefix="/admins", tags=["Admins"])
 
-class Item(BaseModel):
-	name: str
-	description: Union[str, None] = None
-	price: float
-	tax: Union[float, None] = None
-	tags : List[str] = []
 
-class BaseUser(BaseModel):
-	username:str
-	email: EmailStr
-	full_name: str | None = None
+@router.post("/", response_model=AdminSchema)
+def create_admin(admin_data: AdminCreate, db: Database) -> Admin:
+    admin_data.password = get_hash(admin_data.password)
 
-class UserIn(BaseUser):
-	password: str
+    admin = Admin(**admin_data.model_dump())
 
-items = {
-	"foo": {"name": "Foo", "price": 50.2},
-	"bar": {"name": "Bar", "description": "The Bar fighters", "price": 62, "tax": 20.2},
-	"baz": {
-		"name": "Baz",
-		"description": "There goes my baz",
-		"price": 50.2,
-		"tax": 10.5,
-	},
-}
+    try:
+        db.add(admin)
+        db.commit()
+        db.refresh(admin)
+        return admin
+    except sqlalchemy.exc.IntegrityError:
+        db.rollback()
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="admin already exists",
+        )
 
-@app.post("/items/", response_model=Item)
-async def create_item(item: Item) -> Any:
-	return item
 
-@app.post("/users/")
-async def create_user(user: UserIn) -> BaseUser:
-	return user
-@app.get("/items/", response_model= List[Item])
-async def read_item() -> Any:
-	return [
-		Item(name= "Portal Gun", price = 43.5),
-		Item(name = " Plumbus", price = 45.4, description="The name of the product is the same"),
-	]
+@router.get(
+    "/",
+    response_model=list[AdminSchema],
+    dependencies=[Depends(get_authenticated_admin)],
+)
+def get_list_of_admins(db: Database) -> list[Admin]:
+    return db.scalars(select(Admin)).all()
 
-@app.get("/portals/")
-async def get_portal(teleport: bool =False) -> Response:
-	if teleport:
-		return RedirectResponse(url="https://www.youtube.com/watch?")
-	return JSONResponse(content={"message": "Here's your interdimensional portal."})
 
-@app.get("/items/{item_id}/ name", response_model=Item, response_model_exclude={"name", "description"},)
-async def read_item_name(item_id: str):
-	return items[item_id]
+@router.post("/authenticate", response_model=Token)
+def login_admin_for_access_token(
+    db: Database, credentials: OAuth2PasswordRequestForm = Depends()
+) -> dict[str, str]:
+    credentials_exception = HTTPException(
+        status_code=status.HTTP_401_UNAUTHORIZED,
+        detail="incorrect username or password",
+    )
+    admin: Admin | None = db.scalar(
+        select(Admin).where(Admin.username == credentials.username)
+    )
 
-@app.get("/items{item_id}/public", response_model=Item, response_model_exclude={"tax"})
-async def read_item_public_data(item_id: str):
-	return items[item_id]
+    if admin is None:
+        raise credentials_exception
+
+    if not password_matches_hashed(plain=credentials.password, hashed=admin.password):
+        raise credentials_exception
+
+    data = {"sub": str(admin.id)}
+    token = create_token(data=data)
+
+    return {"access_token": token, "token_type": "bearer"}
+
+
+@router.get("/current", response_model=AdminSchema)
+def get_current_admin(admin: AuthenticatedAdmin) -> Admin:
+    return admin
+
+
+@router.get(
+    "/{admin_id}",
+    response_model=AdminSchema,
+    dependencies=[Depends(get_authenticated_admin)],
+)
+def get_admin(admin: AnnotatedAdmin) -> Admin:
+    return admin
+
+
+@router.delete(
+    "/{admin_id}",
+    dependencies=[Depends(get_authenticated_admin)],
+)
+def delete_admin(admin: AnnotatedAdmin, db: Database) -> None:
+    db.delete(admin)
+    db.commit()
