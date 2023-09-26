@@ -1,33 +1,35 @@
-from typing import List
-
 from pydantic import BaseModel
 
 
 class ItemBase(BaseModel):
-	title: str
-	description: str | None = None
+    title: str
+    description: str | None = None
+
 
 class ItemCreate(ItemBase):
-	pass
+    pass
+
 
 class Item(ItemBase):
-	id: int
-	owner_id: int
+    id: int
+    owner_id: int
 
-	class Config:
-		orm_mode = True
+    class Config:
+        orm_mode = True
+
 
 class UserBase(BaseModel):
-	email: str
+    email: str
 
 
 class UserCreate(UserBase):
-	password: str
+    password: str
+
 
 class User(UserBase):
-	id: int
-	is_admin: bool
-	items: List[Item] = []
+    id: int
+    is_active: bool
+    items: list[Item] = []
 
-	class Config:
-		orm_mode = True
+    class Config:
+        orm_mode = True
