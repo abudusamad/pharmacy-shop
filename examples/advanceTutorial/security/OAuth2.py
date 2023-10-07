@@ -5,6 +5,29 @@ from fastapi.security import OAuth2PasswordBearer
 from passlib.context import CryptContext
 from pydantic import BaseModel, EmailStr
 
+SECRET_KEY = "065b1937d2ee89648495749025096d65d4a1af64e03a3e933ef56f833824ab9a"
+ALGORITHM = "HS256"
+ACESS_TOKEN_EXPIRE_MINUTES = 30
+
+
+fake_users_db ={
+	"mascot": {
+		"username": "mascot",
+		"full_name": "Richard Fordjour",
+		"email": "abudusamed@gmail.com",
+		"hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
+		"disabled": False
+	},
+"abudu": {
+		"username": "abudu",
+		"full_name": "Abudu Samadu",
+		"email": "abudusamed@gmail.com",
+	    "hashed_password": "$2b$12$gSvqqUPvlXP2tfVFaWK1Be7DlH.PKZbv5H8KnzzVgXXbVxpva.pFm",
+		"disabled": True
+	},
+
+}
+
 
 class Token(BaseModel):
 	access_token: str
