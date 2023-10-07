@@ -1,1 +1,54 @@
-SECRET_KEY =
+from fastapi import FastAPI
+from fastapi.security import OAuth2PasswordBearer
+from passlib.context import CryptContext
+from pydantic import BaseModel, EmailStr
+
+
+class Token(BaseModel):
+	access_token: str
+	token_type: str
+
+
+class TokenData(BaseModel):
+	username: str | None = None
+	scopes: list[str] = []
+
+
+class User(BaseModel):
+	username: str
+	email: EmailStr | None = None
+	full_name: str | None = None
+	disabled: bool | None = None
+
+
+class UserInDB(User):
+	hashed_password: str
+
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+oauth2_scheme = OAuth2PasswordBearer(
+	tokenUrl="token",
+	scopes={"me": "Read information about the current user.", "items": "Read items."}
+)
+
+app = FastAPI()
+
+
+def verify_password(plain_password, hashed_password):
+	return pwd_context.verify(plain_password, hashed_password)
+
+
+def get_password_hash(password):
+	return pwd_context.hash(password)
+
+
+def get_user(db, username: str):
+	if username in db:
+		user_dict = db[username]
+		return UserInDB(**user_dict)
+
+
+
+def authenticate_user(fake_db, username: str, password: str):
+	user = get_user
