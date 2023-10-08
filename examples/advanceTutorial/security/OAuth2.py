@@ -7,6 +7,7 @@ from fastapi.security import (
     OAuth2PasswordRequestForm,
     SecurityScopes,
 )
+from jose import jwt
 from jose.exceptions import JWTError
 from passlib.context import CryptContext
 from pydantic import BaseModel, ValidationError
