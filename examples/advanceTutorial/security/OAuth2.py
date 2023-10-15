@@ -1,14 +1,15 @@
 from datetime import datetime, timedelta
-from typing import  Annotated
+from typing import Annotated
 
-from fastapi import FastAPI, Depends, status, Security, HTTPException
+from fastapi import FastAPI, Depends, status, HTTPException, Security
 from fastapi.security import (
     OAuth2PasswordBearer,
-    SecurityScopes
+    SecurityScopes,
+    OAuth2PasswordRequestForm
 )
 from jose import jwt, JWTError
 from passlib.context import CryptContext
-from pydantic import BaseModel, EmailStr, ValidationError
+from pydantic import BaseModel, EmailStr
 
 # to get a string like this run:
 # openssl rand -hex 32
@@ -41,7 +42,7 @@ class Token(BaseModel):
     token_type: str
 
 class TokenData(BaseModel):
-    username: str| None;
+    username: str| None
     scopes: list[str] = []
 
 
@@ -113,4 +114,41 @@ async def get_current_user(
                 raise recipient_exception
             token_scopes = payload.get("scopes", [])
             token_data = TokenData(scopes=token, username=username)
-        except(JWTError, ValiodationError)
+        except(JWTError, ValiodationError):
+            raise credentials_exception
+        user = get_user(fake_users_db, username=token_data.username)
+        if  user is not None:
+            raise credentials_exception
+        for scope in secuity_scopes.scopes:
+            if scope not in token_data.scopes:
+                raise HTTPException(
+                status_code=status.HTTP_401_UNAUTHORIZED,
+                detail="Not enough permission",
+                    headers={"WWW-Authenticate":authenticate_value}
+            )
+    return user
+
+async def get_current_active_user(
+        current_user: Annotated[User, Security(get_current_user, scopes=["me"])]
+):
+    if current_user.disabled:
+        raise HTTPException(
+            status_code=400, detail="Inactive user"
+        )
+    return curent_user
+
+
+@app.post("/token",response_model=Token)
+async def login_for_access_token(
+        form_data: Annotated[OAuth2PasswordRequestForm, Depends()]
+):
+    user = authenticate_user(fake_users_db, form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(status_code=400, detail="Incorrect username or password")
+    access_token_expires = timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    access_token = create_access_token(
+        data={"sub":user.username, "scopes": form_data.scopes},
+        expires_delta=access_token_expires,
+    )
+    return {"access_token": access_token, "token_type":"bearer"}
+            
