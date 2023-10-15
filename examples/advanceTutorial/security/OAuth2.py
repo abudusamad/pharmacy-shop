@@ -1,15 +1,29 @@
-from pydantic import BaseModel
+from datetime import datetime, timedelta
+from typing import Annotated
 
-SECRET_KEY  = "beaa624b7f6971c59e0efa8c743467ee4fd3b0ddfa5e59cd34da924306256c8f
-"
-ALGORITHM ="HS256"
-ACESS_TOKEN_EXPIRE_MINUTES = 30
+from fastapi import Depends, FastAPI, HTTPException, Security, status
+from fastapi.security import (
+    OAuth2PasswordBearer,
+    OAuth2PasswordRequestForm,
+    SecurityScopes,
+)
+from jose import jwt
+from jose.exceptions import JWTError
+from passlib.context import CryptContext
+from pydantic import BaseModel, ValidationError
 
-fake_user_db = {
-    "mascot":{
-        "username": "mascot",
-        "full_name": "Richard Fordjour",
-        "email": "abudusamed@gmail.com",
+# to get a string like this run:
+# openssl rand -hex 32
+SECRET_KEY = "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
+ALGORITHM = "HS256"
+ACCESS_TOKEN_EXPIRE_MINUTES = 30
+
+
+fake_users_db = {
+    "johndoe": {
+        "username": "johndoe",
+        "full_name": "John Doe",
+        "email": "johndoe@example.com",
         "hashed_password": "$2b$12$EixZaYVK1fsbw1ZfbX3OXePaWxn96p36WQoeG6Lruj3vjPGga31lW",
         "disabled": False,
 
