@@ -9,7 +9,7 @@ from fastapi.security import (
 )
 from jose import jwt, JWTError
 from passlib.context import CryptContext
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ValidationError
 
 # to get a string like this run:
 # openssl rand -hex 32
@@ -73,7 +73,7 @@ def get_password_hash(password):
     return pwd_context.hash(password)
 
 
-def ger_user(db, username: str):
+def get_user(db, username: str):
     if username in db:
         user_dict = db[username]
         return UserInDB(**user_dict)
@@ -111,10 +111,10 @@ async def get_current_user(
             payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
             username: str = payload.get("sub")
             if username is None:
-                raise recipient_exception
+                raise credentials_exception
             token_scopes = payload.get("scopes", [])
             token_data = TokenData(scopes=token, username=username)
-        except(JWTError, ValiodationError):
+        except(JWTError, ValidationError):
             raise credentials_exception
         user = get_user(fake_users_db, username=token_data.username)
         if  user is not None:
@@ -135,7 +135,7 @@ async def get_current_active_user(
         raise HTTPException(
             status_code=400, detail="Inactive user"
         )
-    return curent_user
+    return current_user
 
 
 @app.post("/token",response_model=Token)
