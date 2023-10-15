@@ -1,16 +1,9 @@
-from datetime import datetime, timedelta
-from typing import Annotated
-
-from fastapi import Depends, FastAPI, HTTPException, Security, status
+from fastapi import FastAPI
 from fastapi.security import (
     OAuth2PasswordBearer,
-    OAuth2PasswordRequestForm,
-    SecurityScopes,
 )
-from jose import jwt
-from jose.exceptions import JWTError
 from passlib.context import CryptContext
-from pydantic import BaseModel, ValidationError
+from pydantic import BaseModel, EmailStr
 
 # to get a string like this run:
 # openssl rand -hex 32
@@ -46,3 +39,35 @@ class TokenData(BaseModel):
     username: str| None;
     scopes: list[str] = []
 
+
+class User(BaseModel):
+    username: str
+    email: EmailStr | None = None
+    full_name: str | None  = None
+    disabled: bool |None = None
+
+class UserInDB(User):
+    hashed_password: str
+
+
+pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+
+
+oauth2_scheme= OAuth2PasswordBearer(
+    tokenUrl="token",
+    scopes={"me": "Read information about the current user", "items":"Read items."}
+)
+
+app = FastAPI()
+
+def verify_password(plain_password, hashed_password):
+    return pwd_context.hash(plain_password, hashed_password)
+
+def get_password_hash(password):
+    return pwd_context.hash(password)
+
+
+def ger_user(db, username: str):
+    if username in db:
+        user_dict = db[username]
+        return UserInDB(**user_dict)
