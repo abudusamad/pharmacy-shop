@@ -1,11 +1,14 @@
 from datetime import datetime, timedelta
+from typing import  Annotated
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Depends, status, Security, HTTPException
 from fastapi.security import (
     OAuth2PasswordBearer,
+    SecurityScopes
 )
+from jose import jwt, JWTError
 from passlib.context import CryptContext
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, ValidationError
 
 # to get a string like this run:
 # openssl rand -hex 32
@@ -89,3 +92,25 @@ def create_access_token(data:dict, expires_delta:timedelta | None = None):
         expire = datetime.utcnow() +  expires_delta
     else:
         expire = datetime.utcnow() + datetime.timedelta(minutes=15)
+
+
+async def get_current_user(
+        secuity_scopes: SecurityScopes, token: Annotated[str, Depends(oauth2_scheme)]
+):
+    if secuity_scopes.scopes:
+        authenticate_value = f'Bearer scope="{secuity_scopes.scope_str}"'
+    else:
+        authenticate_value = "Bearer"
+        credentials_exception = HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate":authenticate_value}
+        )
+        try:
+            payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+            username: str = payload.get("sub")
+            if username is None:
+                raise recipient_exception
+            token_scopes = payload.get("scopes", [])
+            token_data = TokenData(scopes=token, username=username)
+        except(JWTError, ValiodationError)
