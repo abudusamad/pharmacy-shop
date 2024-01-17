@@ -9,11 +9,9 @@ def get_name_with_age(name:str, age:int):
     name_with_age = name + "is this old " + age
     return name_with_age
 
-
 def process_item(items:list[str]):
     for item in items:
-        print(item)
-        
+        print(item)  
         
 def process_item(items:List[str]):
     for item in items:
